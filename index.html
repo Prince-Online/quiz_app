@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="loader.css">
+<link rel="stylesheet" href="style.css">
+<style>
+    .header { border-bottom: 1px solid; display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; }
+    .coins-img { width: 25px; height: 25px; }
+    .icon { border-radius: 125px; width: 40px; height: 40px; }
+    .coins { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 8px 15px; border-radius: 125px; background: #006961; }
+    .form { align-items: center; text-align: center; }
+    .btn { width: 40%; border-radius: 8px; }
+    #userCoins { font-size: 18px; font-weight: 600; }
+    .bg { height: 80px; display: flex; align-items: center; padding: 10px; }
+    #backButton { padding: 10px; font-size: 24px; color: #fff; border-radius: 125px; border: 1px solid #fff; background: transparent; }
+    #matchesContainer { background: #fff; height: 100vh; border-radius: 25px; }
+    .win { font-weight: 500; color: #02192e; font-size: 18px; background: #6bb7f5; display: flex; flex-direction: column; align-items: center; padding: 10px; width: 70px; border-radius: 12px; }
+    .match-card { display: flex; align-items: center; justify-content: space-around; margin: 20px 0 0 0; }
+    .white > h2 { font-weight: 400; text-align: center; margin: 10px; }
+    .entry { color: #02192e; font-size: 20px; font-weight: 500; }
+    .win > span { font-size: 20px; font-weight: 600; color: #fff;}
+    .play { display: flex; align-items: center; justify-content: center; padding: 10px; border-radius: 125px; border: none; width: 50px; height: 50px; font-size: 18px; gap: 10px; flex-direction: row-reverse; background: #02192e; color: #fff; font-weight: 500; }
+    .disco-hr { margin: 10px 20px; }
+    .footer { gap: 150px; display: flex; justify-content: space-around; position: fixed; background: #10364e; bottom: 0; padding: 20px 10px; width: 100%; }
+    .footer > a { font-size: 24px; color: #fff; }
+    .home { position: fixed; bottom: 3%; background: #10364e; padding: 15px; border-radius: 125px; border: 2px solid #02192e; }
+    .image > img { border-radius: 125px; }
+    .slider-container { position: relative; width: 90%; max-width: 600px; margin: auto; overflow: hidden; margin-top: 20px; }
+    .slider img { box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; width: 100%; height: 180px; border-radius: 12px; display: none; cursor: pointer; }
+    .dots { text-align: center; margin-top: 10px; }
+    .dot { height: 12px; width: 12px; margin: 0 5px; background-color: transparent; border: 1px solid; border-radius: 50%; display: inline-block; cursor: pointer; }
+    .active { background-color: #fff; }
+    #matchesPage { position: fixed; width: 100%; top: 0; background: #02192e; }
+    .game-text { text-align: left; }
+    .btn { width: 100%; }
+</style>
+<div class="header">
+    <img src="https://i.ibb.co/CKy8xSQN/icon.png" class="icon" onclick="reload()">
+    <p class="coins" onclick="window.location.href='add_coins.html';"><img src="https://cdn.pixabay.com/photo/2014/12/21/23/57/money-576443_1280.png" class="coins-img"> <span id="userCoins"></span></p>
+</div>
+<div class="slider-container">
+    <div class="slider" id="slider"></div>
+    <div class="dots" id="dots"></div>
+</div>
+<div id="userInfo" class="form">
+    <p style="display: none;"><b>Email:</b> <span id="userEmail"></span></p>
+    <h2>About The Game</h2>
+    <p class="game-text">Step into the adrenaline-pumping world of <strong> Douchup,</strong> where students battle hordes of zombies in a fast-paced, 20-second shooting frenzy! Test your reflexes and precision on the game canvas as you eliminate as many zombies as possible. Compete with friends, earn pocket money, and prove your skills as the ultimate zombie hunter. <strong> Get ready, aim, and fire!</strong></p>
+    <button id="battleButton" class="btn">Aim To Zombie</button>
+</div>
+<div id="loader" style="display: none;"><div class="loader"></div></div>
+
+<div id="dashboard" style="display: none;">
+    <h2>Available Matches</h2>
+</div>
+
+<div id="matchesPage" style="display: none;">
+    <div class="bg">
+        <button id="backButton"><i class="fa-solid fa-arrow-left"></i></button>
+    </div>
+    <div class="white"> 
+        <h2>Play And Win!</h2>
+        <div id="matchesContainer"></div>
+    </div>
+</div>
+
+<div class="footer">
+    <a href="refer.html"><i class="fa-solid fa-gift"></i></a>
+    <a onclick="reload()" class="home"><i class="fa-solid fa-house"></i></a>
+    <a href="profile.html"><i class="fa-solid fa-user-secret"></i></a>
+</div>
+<script src="script.js"></script>
+<script>
+    function reload(){
+        location.reload();
+    }
+</script>
+<script>
+    let images = [];
+    let urls = [];
+    let currentIndex = 0;
+
+    function fetchData() {
+        fetch("https://script.google.com/macros/s/AKfycbxc9xP4mRBgws9Sv-b1ORRqQXPxI1zXevaNNj0lLfs1C-ntPBm9QwMRKvTaIn_W_oOF8A/exec", { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+            images = data.map(row => row[0]);
+            urls = data.map(row => row[1]);
+            if (images.length > 0) setupSlider();
+        });
+    }
+
+    function setupSlider() {
+        const slider = document.getElementById("slider");
+        const dotsContainer = document.getElementById("dots");
+        slider.innerHTML = images.map((img, index) => `<img src="${img}" onclick="redirect(${index})">`).join('');
+        dotsContainer.innerHTML = images.map((_, index) => `<span class="dot" onclick="showSlide(${index})"></span>`).join('');
+        showSlide(0);
+        setInterval(() => showSlide((currentIndex + 1) % images.length), 3000);
+    }
+
+    function showSlide(index) {
+        currentIndex = index;
+        document.querySelectorAll(".slider img").forEach((img, i) => img.style.display = i === index ? "block" : "none");
+        document.querySelectorAll(".dot").forEach((dot, i) => dot.classList.toggle("active", i === index));
+    }
+
+    function redirect(index) {
+        window.location.href = urls[index];
+    }
+
+    fetchData();
+</script>
